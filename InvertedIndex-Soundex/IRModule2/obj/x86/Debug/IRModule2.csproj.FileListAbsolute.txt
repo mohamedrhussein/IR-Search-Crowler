@@ -1,0 +1,5 @@
+c:\users\codehazem\documents\visual studio 2010\Projects\IRModule2\IRModule2\bin\Debug\IRModule2.exe
+c:\users\codehazem\documents\visual studio 2010\Projects\IRModule2\IRModule2\bin\Debug\IRModule2.pdb
+c:\users\codehazem\documents\visual studio 2010\Projects\IRModule2\IRModule2\obj\x86\Debug\IRModule2.exe
+c:\users\codehazem\documents\visual studio 2010\Projects\IRModule2\IRModule2\obj\x86\Debug\IRModule2.pdb
+C:\Users\CodeHazem\documents\visual studio 2010\Projects\IRModule2\IRModule2\obj\x86\Debug\IRModule2.csprojResolveAssemblyReference.cache
