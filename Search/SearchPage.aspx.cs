@@ -840,7 +840,7 @@ class Stemmer
 
 public partial class SearchPage : System.Web.UI.Page
 {
-    string ConnectionString = @"Data Source=HazemMarawan\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
+    string ConnectionString = @"Data Source=MohamedRabie\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
     SqlConnection conn;
     SqlCommand cmd;
     Object RetrunedObjectFromDb;
@@ -881,7 +881,7 @@ public partial class SearchPage : System.Web.UI.Page
 
     public static List<string> SpellCorrection(string s)
     {
-        string ConnectionString = @"Data Source=HazemMarawan\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
+        string ConnectionString = @"Data Source=MohamedRabie\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
         SqlConnection conn;
         SqlCommand cmd;
         Object RetrunedObjectFromDb;
@@ -1002,7 +1002,7 @@ public partial class SearchPage : System.Web.UI.Page
     public static string [] SoundexOfWord(string s)
     {
         
-        string ConnectionString = @"Data Source=HazemMarawan\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
+        string ConnectionString = @"Data Source=MohamedRabie\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
         SqlConnection conn;
         SqlCommand cmd;
         Object RetrunedObjectFromDb;
@@ -1153,7 +1153,7 @@ public partial class SearchPage : System.Web.UI.Page
     public static int[] SearchOneWords(string s)
     {
         string ReturnedResultFromDb;
-        string ConnectionString = @"Data Source=HazemMarawan\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
+        string ConnectionString = @"Data Source=MohamedRabie\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
         SqlConnection conn;
         SqlCommand cmd;
         Object RetrunedObjectFromDb;
@@ -1232,218 +1232,7 @@ public partial class SearchPage : System.Web.UI.Page
 
 
     }
-
-    public static List<int> SearchMultibleWords(string s)
-    {
-        string ConnectionString = @"Data Source=HazemMarawan\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
-        SqlConnection conn;
-        SqlCommand cmd;
-        Object RetrunedObjectFromDb;
-        conn = new SqlConnection(ConnectionString);
-        conn.Open();
-        Stemmer Stem = new Stemmer();
-        string UserText = s;
-        string TmpTxt = s;
-
-        TmpTxt = CaseFoldingLower(TmpTxt);
-
-        string[] OriginalWords = TmpTxt.Split(' ');
-
-
-        string CaseFoldingResult = CaseFoldingLower(UserText);
-
-        string[] AllWordsAfterSplit = SplitWords(CaseFoldingResult);
-        string[] ArrWithoutStopWord = StopWords.RemoveStopwords(AllWordsAfterSplit);
-
-        for (int j = 0; j < ArrWithoutStopWord.Length; j++)
-        {
-            ArrWithoutStopWord[j] = Stem.stem(ArrWithoutStopWord[j]);
-        }
-
-        for (int j = 0; j < OriginalWords.Length; j++)
-        {
-            OriginalWords[j] = Stem.stem(OriginalWords[j]);
-        }
-
-
-        int[] PositionsOfWords = new int[ArrWithoutStopWord.Length];
-        for (int i = 0; i < ArrWithoutStopWord.Length; i++)
-        {
-            for (int j = 0; j < OriginalWords.Length; j++)
-            {
-                if (ArrWithoutStopWord[i] == OriginalWords[j])
-                {
-                    PositionsOfWords[i] = j;
-                }
-            }
-
-        }
-        int[] DiffOfPositions = new int[ArrWithoutStopWord.Length - 1];
-        for (int i = 0; i < ArrWithoutStopWord.Length - 1; i++)
-        {
-            DiffOfPositions[i] = PositionsOfWords[i + 1] - PositionsOfWords[i];
-
-        }
-        string[] Doc_IDsOfEachWord = new string[ArrWithoutStopWord.Length];
-        string[] AllPostionOfEachWord = new string[ArrWithoutStopWord.Length];
-
-        for (int i = 0; i < ArrWithoutStopWord.Length; i++)
-        {
-            cmd = new SqlCommand("select doc_id from InfoRet.dbo.LastInverted where term  = @terminput ", conn);
-            cmd.Parameters.AddWithValue("@terminput", ArrWithoutStopWord[i]);
-            RetrunedObjectFromDb = cmd.ExecuteScalar();
-            Doc_IDsOfEachWord[i] = System.Convert.ToString(RetrunedObjectFromDb);
-
-
-            cmd = new SqlCommand("select positions from InfoRet.dbo.LastInverted where term  = @terminput ", conn);
-            cmd.Parameters.AddWithValue("@terminput", ArrWithoutStopWord[i]);
-            RetrunedObjectFromDb = cmd.ExecuteScalar();
-            AllPostionOfEachWord[i] = System.Convert.ToString(RetrunedObjectFromDb);
-
-
-        }
-
-        Dictionary<int, int> DetectExact = new Dictionary<int, int>();
-
-        Dictionary<int, int> DetectFreq = new Dictionary<int, int>();
-        Dictionary<int, int> DetectSumPosition = new Dictionary<int, int>();
-
-        List<int> ReturnedDocID = new List<int>();
-        List<int> ReturnedPosSum = new List<int>();
-        for (int i = 0; i < ArrWithoutStopWord.Length - 1; i++)
-        {
-
-            string W1IDs = Doc_IDsOfEachWord[i];
-            string W2IDs = Doc_IDsOfEachWord[i + 1];
-
-            string[] ArrIDsW1 = W1IDs.Split(',');
-            string[] ArrIDsW2 = W2IDs.Split(',');
-
-            string W1Ps = AllPostionOfEachWord[i];
-            string W2Ps = AllPostionOfEachWord[i + 1];
-
-            string[] ArrPW1 = W1Ps.Split('@');
-            string[] ArrPW2 = W2Ps.Split('@');
-
-            var CommonIDs = ArrIDsW1.Intersect(ArrIDsW2);
-            List<string> CommonIDsList = new List<string>();
-            foreach (var ID in CommonIDs)
-            {
-                CommonIDsList.Add(ID.ToString());
-
-            }
-
-            int INdexOfID1 = 0, INdexOfID2 = 0;
-            for (int j = 0; j < CommonIDsList.Count(); j++)
-            {
-                for (int g = 0; g < ArrIDsW1.Length; g++)
-                {
-                    if (CommonIDsList[j] == ArrIDsW1[g])
-                    {
-                        INdexOfID1 = g;
-                        break;
-                    }
-
-                }
-
-                for (int k = 0; k < ArrIDsW2.Length; k++)
-                {
-                    if (CommonIDsList[j] == ArrIDsW2[k])
-                    {
-                        INdexOfID2 = k;
-                        break;
-                    }
-
-                }
-                int X = ArrPW2.Length;
-                string P1 = ArrPW1[INdexOfID1];
-                string P2 = ArrPW2[INdexOfID2];
-
-                string[] ArrPo1 = P1.Split(',');
-                string[] ArrPo2 = P2.Split(',');
-
-                int[] ArrPo1Int = new int[ArrPo1.Length];
-                int[] ArrPo2Int = new int[ArrPo2.Length];
-
-                for (int d = 0; d < ArrPo1.Length; d++)
-                {
-                    ArrPo1Int[d] = int.Parse(ArrPo1[d]);
-                }
-
-                for (int d = 0; d < ArrPo2.Length; d++)
-                {
-                    ArrPo2Int[d] = int.Parse(ArrPo2[d]);
-                }
-                int TmpPos = 0;
-                for (int d = 0; d < ArrPo2Int.Length; d++)
-                {
-                    for (int b = 0; b < ArrPo1Int.Length; b++)
-                    {
-                        if (ArrPo2Int[d] - ArrPo1Int[b] > 0)
-                        {
-                            if (TmpPos == 0)
-                                TmpPos = ArrPo2Int[d] - ArrPo1Int[b];
-                            else if ((ArrPo2Int[d] - ArrPo1Int[b]) < TmpPos)
-                                TmpPos = ArrPo2Int[d] - ArrPo1Int[b];
-                        }
-                    }
-                }
-                if (DetectSumPosition.ContainsKey(int.Parse(CommonIDsList[j])))
-                {
-                    DetectSumPosition[int.Parse(CommonIDsList[j])] = DetectSumPosition[int.Parse(CommonIDsList[j])] + TmpPos;
-                }
-                else
-                {
-                    DetectSumPosition.Add(int.Parse(CommonIDsList[j]), TmpPos);
-                }
-
-            }
-        }
-
-        for (int i = 0; i < DetectSumPosition.Count; i++)
-        {
-            ReturnedDocID.Add(int.Parse(DetectSumPosition.ElementAt(i).Key.ToString()));
-            ReturnedPosSum.Add(int.Parse(DetectSumPosition.ElementAt(i).Value.ToString()));
-        }
-
-
-
-
-
-
-        for (int i = 0; i < ReturnedPosSum.Count() - 1; i++)
-        {
-            for (int j = i + 1; j < ReturnedPosSum.Count(); j++)
-            {
-                if (ReturnedPosSum[i] > ReturnedPosSum[j])
-                {
-                    int Tmp = ReturnedPosSum[i];
-                    ReturnedPosSum[i] = ReturnedPosSum[j];
-                    ReturnedPosSum[j] = Tmp;
-
-                    Tmp = ReturnedDocID[i];
-                    ReturnedDocID[i] = ReturnedDocID[j];
-                    ReturnedDocID[j] = Tmp;
-                }
-            }
-        }
-
-
-        return ReturnedDocID;
-        //string ReturnedLink = "";
-        //for (int i = 0; i < ReturnedDocID.Count(); i++)
-        //{
-        //    cmd = new SqlCommand("select Link from InfoRet.dbo.IRDPages where id  = @id ", conn);
-        //    cmd.Parameters.AddWithValue("@id", ReturnedDocID[i]);
-        //    RetrunedObjectFromDb = cmd.ExecuteScalar();
-        //    ReturnedLink = System.Convert.ToString(RetrunedObjectFromDb);
-        //    ListOfResults.Items.Add(ReturnedLink);
-        //}
-
-
-    }
    
-
     protected void Page_Load(object sender, EventArgs e)
     { 
 
