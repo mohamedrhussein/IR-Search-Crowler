@@ -993,7 +993,7 @@ namespace IRModule2
         static void Main(string[] args)
         {
             //Database Connection String
-            string connection_string = @"Data Source=HazemMarawan\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
+            string connection_string = @"Data Source=MohamedRabie\SqlExpress;Initial Catalog=InfoRet;Integrated Security=True";
 
             //Object that has the Returned Value from DB
             Object RetrunedObjectFromDb;
